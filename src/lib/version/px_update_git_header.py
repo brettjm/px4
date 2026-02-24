@@ -116,34 +116,53 @@ header += f"""
 
 # Mavlink
 if (os.path.exists('src/modules/mavlink/mavlink/.git')):
-    mavlink_git_version = subprocess.check_output('git rev-parse --verify HEAD'.split(),
-                                      cwd='src/modules/mavlink/mavlink', stderr=subprocess.STDOUT).decode('utf-8').strip()
-    mavlink_git_version_short = mavlink_git_version[0:16]
+    try:
+        mavlink_git_version = subprocess.check_output(
+            'git rev-parse --verify HEAD'.split(),
+            cwd='src/modules/mavlink/mavlink',
+            stderr=subprocess.STDOUT).decode('utf-8').strip()
+        mavlink_git_version_short = mavlink_git_version[0:16]
 
-    header += f"""
+        header += f"""
 #define MAVLINK_LIB_GIT_VERSION_STR  "{mavlink_git_version}"
 #define MAVLINK_LIB_GIT_VERSION_BINARY 0x{mavlink_git_version_short}
+"""
+    except Exception:
+        header += """
+#define MAVLINK_LIB_GIT_VERSION_STR  "0000000000000000"
+#define MAVLINK_LIB_GIT_VERSION_BINARY 0x0000000000000000
 """
 
 
 # NuttX
 if (os.path.exists('platforms/nuttx/NuttX/nuttx/.git')):
-    nuttx_git_tags = subprocess.check_output('git -c versionsort.suffix=- tag --sort=v:refname'.split(),
-                                  cwd='platforms/nuttx/NuttX/nuttx', stderr=subprocess.STDOUT).decode('utf-8').strip()
-    # may be empty if shallow clone
-    if (len(nuttx_git_tags) > 0):
-        nuttx_git_tag = re.findall(r'nuttx-[0-9]+\.[0-9]+\.[0-9]+', nuttx_git_tags)[-1].replace("nuttx-", "v")
-        nuttx_git_tag = re.sub('-.*', '.0', nuttx_git_tag)
-    else:
-        nuttx_git_tag = "v0.0.0"
-    nuttx_git_version = subprocess.check_output('git rev-parse --verify HEAD'.split(),
-                                      cwd='platforms/nuttx/NuttX/nuttx', stderr=subprocess.STDOUT).decode('utf-8').strip()
-    nuttx_git_version_short = nuttx_git_version[0:16]
+    try:
+        nuttx_git_tags = subprocess.check_output(
+            'git -c versionsort.suffix=- tag --sort=v:refname'.split(),
+            cwd='platforms/nuttx/NuttX/nuttx',
+            stderr=subprocess.STDOUT).decode('utf-8').strip()
+        # may be empty if shallow clone
+        if (len(nuttx_git_tags) > 0):
+            nuttx_git_tag = re.findall(r'nuttx-[0-9]+\.[0-9]+\.[0-9]+', nuttx_git_tags)[-1].replace("nuttx-", "v")
+            nuttx_git_tag = re.sub('-.*', '.0', nuttx_git_tag)
+        else:
+            nuttx_git_tag = "v0.0.0"
+        nuttx_git_version = subprocess.check_output(
+            'git rev-parse --verify HEAD'.split(),
+            cwd='platforms/nuttx/NuttX/nuttx',
+            stderr=subprocess.STDOUT).decode('utf-8').strip()
+        nuttx_git_version_short = nuttx_git_version[0:16]
 
-    header += f"""
+        header += f"""
 #define NUTTX_GIT_VERSION_STR  "{nuttx_git_version}"
 #define NUTTX_GIT_VERSION_BINARY 0x{nuttx_git_version_short}
 #define NUTTX_GIT_TAG_STR  "{nuttx_git_tag}"
+"""
+    except Exception:
+        header += """
+#define NUTTX_GIT_VERSION_STR  "0000000000000000"
+#define NUTTX_GIT_VERSION_BINARY 0x0000000000000000
+#define NUTTX_GIT_TAG_STR  "v0.0.0"
 """
 
 
