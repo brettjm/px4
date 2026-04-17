@@ -76,11 +76,11 @@ void RcAndDataLinkChecks::checkAndReport(const Context &context, Report &reporte
 
 	if (reporter.failsafeFlags().gcs_connection_lost) {
 
-		// Prevent arming if we neither have manual control nor a GCS connection. TODO: disabled for now due to MAVROS tests
-		bool gcs_connection_required =  _param_nav_dll_act.get() > 0
-						/*|| (rc_is_optional && reporter.failsafeFlags().manual_control_signal_lost) */;
-		NavModes affected_modes = gcs_connection_required ? NavModes::All : NavModes::None;
-		events::LogLevel log_level = gcs_connection_required ? events::Log::Error : events::Log::Info;
+		// DX customization: do not require a traditional ground control station for arming.
+		// This stack uses the companion agent as the control path instead of QGroundControl.
+		const bool gcs_connection_required = false;
+		NavModes affected_modes = NavModes::None;
+		events::LogLevel log_level = events::Log::Info;
 		/* EVENT
 		 * @description
 		 * To arm, at least a data link or RC must be present.
